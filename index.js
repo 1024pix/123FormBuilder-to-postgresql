@@ -1,5 +1,8 @@
 import 'dotenv/config'
 import {env} from 'node:process'
+import { HttpClient } from './HttpClient.js';
+import { FieldFactory } from './Field.js';
+import { FieldResponseFactory } from './FieldResponse.js';
 
 async function main() {
   const formBuilder = new FormBuilderClient(
@@ -17,30 +20,6 @@ async function main() {
   });
 }
 
-class HttpClient {
-  async get(url, headers) {
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers,
-      },
-    });
-    return response.json();
-  }
-
-  async post(url, body, headers) {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers,
-      },
-      body: JSON.stringify(body),
-    });
-    return response.json();
-  }
-}
-
 class FormBuilderClient {
   #httpClient;
   #baseUrl;
@@ -48,11 +27,11 @@ class FormBuilderClient {
   #password;
   #token;
 
-  constructor(url, username, password) {
+  constructor(url, username, password, httpClient = new HttpClient()) {
     this.#baseUrl = url;
     this.#username = username;
     this.#password = password;
-    this.#httpClient = new HttpClient();
+    this.#httpClient = httpClient;
   }
 
   async getToken() {
@@ -118,102 +97,6 @@ class FormBuilderClient {
       });
       return { id: submission.id, fieldResponses };
     });
-  }
-}
-
-class Field {
-  constructor({ id, name, type, values }) {
-    this.id = id;
-    this.name = name;
-    this.type = type;
-    if (type !== 'text' && type !== 'qcm') {
-      console.error(`Type ${type} not supported, field ${name} with id ${id}`);
-    }
-  }
-}
-
-class QCMField extends Field {
-  constructor({ id, name, proposals }) {
-    super({ id, name, type: 'qcm' });
-    this.proposals = proposals;
-  }
-}
-
-class FieldFactory {
-  static createField(field) {
-    switch (field.type) {
-      case 1:
-        return new Field({ ...field, type: 'text' });
-      case 2:
-        const proposals = field.values.split('||');
-        return new QCMField({ ...field, proposals});
-      default:
-        return new Field(field);
-    }
-  }
-}
-
-class FieldResponse {
-  constructor(formField) {
-    this.id = formField.id;
-    this.fieldName = formField.name;
-    this.type = formField.type;
-    this.formField = formField;
-  }
-}
-
-class TextFieldResponse extends FieldResponse {
-  constructor(formField) {
-    super(formField);
-  }
-
-  insertResponse({ fieldvalue }) {
-    this.value = fieldvalue;
-  }
-
-  get responses() {
-    return {
-      id: this.id,
-      fieldName: this.fieldName,
-      value: this.value,
-    }
-  }
-}
-
-class QCMPFieldResponse extends FieldResponse {
-  #responses;
-
-  constructor(formField) {
-    super(formField);
-    this.#responses = Array(formField.proposals.length);
-  }
-
-  insertResponse(field) {
-    const proposalId = field.fieldid.split('_')[1];
-    this.#responses[proposalId - 1] = field.value;
-  }
-
-  get responses() {
-    return {
-      id: this.id,
-      fieldName: this.fieldName,
-      proposals: this.formField.proposals,
-      responses: this.#responses,
-      value: this.value,
-    }
-  }
-}
-
-class FieldResponseFactory {
-  static createFieldResponse(formField) {
-    switch (formField.type) {
-      case 'text':
-        return new TextFieldResponse(formField);
-      case 'qcm':
-        return new QCMPFieldResponse(formField);
-      default:
-        return new TextFieldResponse(formField);
-    }
   }
 }
 
