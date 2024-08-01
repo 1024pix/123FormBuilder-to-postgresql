@@ -1,5 +1,5 @@
-import 'dotenv/config'
-import {env} from 'node:process'
+import 'dotenv/config';
+import { env } from 'node:process';
 import { HttpClient } from './HttpClient.js';
 import { FieldFactory } from './Field.js';
 import { FieldResponseFactory } from './FieldResponse.js';
@@ -14,8 +14,10 @@ async function main() {
   const formPixOrga = 50313;
 
   const formSubmissions = await formBuilder.getFormSubmissions(formPixOrga);
-  formSubmissions.forEach(submission => {
+  formSubmissions.forEach((submission) => {
+    // eslint-disable-next-line no-console
     console.log(submission.id);
+    // eslint-disable-next-line no-console
     console.log(submission.fieldResponses);
   });
 }
@@ -52,7 +54,7 @@ class FormBuilderClient {
     const token = await this.getToken();
     const formsUrl = `${this.#baseUrl}/forms`;
     return this.#httpClient.get(formsUrl, {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     });
   }
 
@@ -61,7 +63,7 @@ class FormBuilderClient {
 
     const formUrl = `${this.#baseUrl}/forms/${formId}`;
     return this.#httpClient.get(formUrl, {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     });
   }
 
@@ -69,7 +71,7 @@ class FormBuilderClient {
     const token = await this.getToken();
     const formUrl = `${this.#baseUrl}/forms/${formId}`;
     const result = await this.#httpClient.get(`${formUrl}/fields`, {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     });
     return result.data.controls.data.map(field => FieldFactory.createField(field));
   }
@@ -81,17 +83,18 @@ class FormBuilderClient {
 
     const formUrl = `${this.#baseUrl}/forms/${formId}/submissions`;
     const result = await this.#httpClient.get(formUrl, {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     });
 
-    return result.data.map(submission => {
+    return result.data.map((submission) => {
       const fieldResponses = fields.map(field => FieldResponseFactory.createFieldResponse(field));
       const fieldsData = submission.content.fields.field;
       fieldsData.forEach((field) => {
         const foundFieldResponse = fieldResponses.find(f => field.fieldid.includes(f.id));
         if (!foundFieldResponse) {
           console.error(`Field with id ${field.fieldid} not found`);
-        } else {
+        }
+        else {
           foundFieldResponse.insertResponse(field);
         }
       });
@@ -100,4 +103,4 @@ class FormBuilderClient {
   }
 }
 
-main().then().catch(console.error)
+main().then().catch(console.error);

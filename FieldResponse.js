@@ -8,10 +8,6 @@ class FieldResponse {
 }
 
 class TextFieldResponse extends FieldResponse {
-  constructor(formField) {
-    super(formField);
-  }
-
   insertResponse({ fieldvalue }) {
     this.value = fieldvalue;
   }
@@ -21,7 +17,7 @@ class TextFieldResponse extends FieldResponse {
       id: this.id,
       fieldName: this.fieldName,
       value: this.value,
-    }
+    };
   }
 }
 
@@ -45,7 +41,7 @@ class QCMPFieldResponse extends FieldResponse {
       proposals: this.formField.proposals,
       responses: this.#responses,
       value: this.value,
-    }
+    };
   }
 }
 
