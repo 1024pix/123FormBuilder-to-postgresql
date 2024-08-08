@@ -49,6 +49,28 @@ class QCMPFieldResponse extends FieldResponse {
   }
 }
 
+class QCUPFieldResponse extends FieldResponse {
+  #response;
+
+  constructor(formField) {
+    super(formField);
+  }
+
+  insertResponse({ fieldvalue }) {
+    this.#response = fieldvalue;
+  }
+
+  get responses() {
+    return {
+      id: this.id,
+      fieldName: this.fieldName,
+      proposals: this.formField.proposals,
+      response: this.#response,
+      value: this.value,
+    };
+  }
+}
+
 class FieldResponseFactory {
   static createFieldResponse(formField) {
     switch (formField.type) {
@@ -56,6 +78,8 @@ class FieldResponseFactory {
         return new TextFieldResponse(formField);
       case 'qcm':
         return new QCMPFieldResponse(formField);
+      case 'qcu':
+        return new QCUPFieldResponse(formField);
       default:
         return new FieldResponse(formField);
     }
