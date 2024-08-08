@@ -3,9 +3,6 @@ class Field {
     this.id = id;
     this.name = name;
     this.type = type;
-    if (type !== 'text' && type !== 'qcm') {
-      console.error(`Type ${type} not supported, field ${name} with id ${id}`);
-    }
   }
 }
 

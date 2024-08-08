@@ -5,6 +5,10 @@ class FieldResponse {
     this.type = formField.type;
     this.formField = formField;
   }
+
+  insertResponse(field) {
+    console.error({ response: field });
+  }
 }
 
 class TextFieldResponse extends FieldResponse {
@@ -53,7 +57,7 @@ class FieldResponseFactory {
       case 'qcm':
         return new QCMPFieldResponse(formField);
       default:
-        return new TextFieldResponse(formField);
+        return new FieldResponse(formField);
     }
   }
 }
