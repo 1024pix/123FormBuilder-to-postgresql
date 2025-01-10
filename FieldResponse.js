@@ -7,14 +7,14 @@ class FieldResponse {
   }
 
   insertResponse(field) {
-    this.response = field.fieldvalue;
+    this.responses = field.fieldvalue;
   }
 
-  get responses() {
+  get formattedResponse() {
     return {
       id: this.id,
       fieldName: this.fieldName,
-      responses: this.response,
+      responses: this.responses,
       type: this.type,
     };
   }
@@ -22,48 +22,27 @@ class FieldResponse {
 
 class TextFieldResponse extends FieldResponse {
   insertResponse({ fieldvalue }) {
-    this.response = fieldvalue;
-  }
-
-  get responses() {
-    return {
-      id: this.id,
-      fieldName: this.fieldName,
-      responses: this.response,
-      type: this.type,
-    };
+    this.responses = fieldvalue;
   }
 }
 
 class QCMPFieldResponse extends FieldResponse {
-  #responses;
+  responses;
 
   constructor(formField) {
     super(formField);
-    this.#responses = [];
+    this.responses = [];
   }
 
   insertResponse(field) {
     const proposalId = Number(field.fieldid.split('_')[1]);
     if (field.fieldvalue === 'yes') {
-      this.#responses.push(this.formField.proposals[proposalId]);
+      this.responses.push(this.formField.proposals[proposalId]);
     }
-  }
-
-  get responses() {
-    return {
-      id: this.id,
-      fieldName: this.fieldName,
-      proposals: this.formField.proposals,
-      responses: this.#responses,
-      type: this.type,
-    };
   }
 }
 
 class QCUPFieldResponse extends FieldResponse {
-  #response;
-
   constructor(formField) {
     super(formField);
   }
@@ -71,39 +50,19 @@ class QCUPFieldResponse extends FieldResponse {
   insertResponse(field) {
     const value = field.fieldvalue;
     if (value !== undefined && Object.keys(value).length !== 0) {
-      this.#response = field.fieldvalue;
+      this.responses = field.fieldvalue;
     }
-  }
-
-  get responses() {
-    return {
-      id: this.id,
-      fieldName: this.fieldName,
-      proposals: this.formField.proposals,
-      responses: this.#response,
-      type: this.type,
-    };
   }
 }
 
 class IdentityFieldResponse extends FieldResponse {
-  #responses;
-
   constructor(formField) {
     super(formField);
-    this.#responses = [];
+    this.responses = [];
   }
 
   insertResponse(field) {
-    this.#responses.push(field.fieldvalue);
-  }
-
-  get responses() {
-    return {
-      id: this.id,
-      type: this.type,
-      responses: this.#responses,
-    };
+    this.responses.push(field.fieldvalue);
   }
 }
 
