@@ -7,20 +7,30 @@ class FieldResponse {
   }
 
   insertResponse(field) {
-    console.error({ response: field });
-  }
-}
-
-class TextFieldResponse extends FieldResponse {
-  insertResponse({ fieldvalue }) {
-    this.value = fieldvalue;
+    this.response = field.fieldvalue;
   }
 
   get responses() {
     return {
       id: this.id,
       fieldName: this.fieldName,
-      value: this.value,
+      responses: this.response,
+      type: this.type,
+    };
+  }
+}
+
+class TextFieldResponse extends FieldResponse {
+  insertResponse({ fieldvalue }) {
+    this.response = fieldvalue;
+  }
+
+  get responses() {
+    return {
+      id: this.id,
+      fieldName: this.fieldName,
+      responses: this.response,
+      type: this.type,
     };
   }
 }
@@ -30,12 +40,14 @@ class QCMPFieldResponse extends FieldResponse {
 
   constructor(formField) {
     super(formField);
-    this.#responses = Array(formField.proposals.length);
+    this.#responses = [];
   }
 
   insertResponse(field) {
-    const proposalId = field.fieldid.split('_')[1];
-    this.#responses[proposalId - 1] = field.value;
+    const proposalId = Number(field.fieldid.split('_')[1]);
+    if (field.fieldvalue === 'yes') {
+      this.#responses.push(this.formField.proposals[proposalId]);
+    }
   }
 
   get responses() {
@@ -44,7 +56,7 @@ class QCMPFieldResponse extends FieldResponse {
       fieldName: this.fieldName,
       proposals: this.formField.proposals,
       responses: this.#responses,
-      value: this.value,
+      type: this.type,
     };
   }
 }
@@ -56,8 +68,11 @@ class QCUPFieldResponse extends FieldResponse {
     super(formField);
   }
 
-  insertResponse({ fieldvalue }) {
-    this.#response = fieldvalue;
+  insertResponse(field) {
+    const value = field.fieldvalue;
+    if (value !== undefined && Object.keys(value).length !== 0) {
+      this.#response = field.fieldvalue;
+    }
   }
 
   get responses() {
@@ -65,8 +80,29 @@ class QCUPFieldResponse extends FieldResponse {
       id: this.id,
       fieldName: this.fieldName,
       proposals: this.formField.proposals,
-      response: this.#response,
-      value: this.value,
+      responses: this.#response,
+      type: this.type,
+    };
+  }
+}
+
+class IdentityFieldResponse extends FieldResponse {
+  #responses;
+
+  constructor(formField) {
+    super(formField);
+    this.#responses = [];
+  }
+
+  insertResponse(field) {
+    this.#responses.push(field.fieldvalue);
+  }
+
+  get responses() {
+    return {
+      id: this.id,
+      type: this.type,
+      responses: this.#responses,
     };
   }
 }
@@ -80,6 +116,8 @@ class FieldResponseFactory {
         return new QCMPFieldResponse(formField);
       case 'qcu':
         return new QCUPFieldResponse(formField);
+      case 'identity':
+        return new IdentityFieldResponse(formField);
       default:
         return new FieldResponse(formField);
     }
