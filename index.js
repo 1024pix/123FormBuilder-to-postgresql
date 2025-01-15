@@ -98,7 +98,8 @@ class FormBuilderClient {
           foundFieldResponse.insertResponse(field);
         }
       });
-      return { id: submission.id, fieldResponses };
+      const filteredResponses = fieldResponses.filter(fieldResponse => fieldResponse.formattedResponse.responses !== undefined).map(({ formattedResponse }) => formattedResponse);
+      return { id: submission.id, refid: submission.content.refid, fieldResponses: filteredResponses };
     });
   }
 }
